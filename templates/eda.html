@@ -1,0 +1,679 @@
+ <!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>EDA - Placement Prediction</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<header class="topbar">
+    <h1>Placement Prediction Project</h1>
+</header>
+
+
+<div class="layout">
+
+    <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
+
+    <nav class="sidebar">
+
+        <ul>
+
+            <li>
+                <a href="{{ url_for('data_loading') }}"
+                   class="menu-item">
+                    Data Loading
+                </a>
+            </li>
+
+            <li>
+                <a href="{{ url_for('eda_page') }}"
+                   class="menu-item active">
+                    EDA
+                </a>
+            </li>
+
+            <li class="menu-item disabled">
+                Preprocessing (Coming Soon)
+            </li>
+
+            <li class="menu-item disabled">
+                Model Training (Coming Soon)
+            </li>
+
+            <li class="menu-item disabled">
+                Prediction (Coming Soon)
+            </li>
+
+        </ul>
+
+    </nav>
+
+
+    <!-- =====================================================
+         MAIN CONTENT
+    ====================================================== -->
+
+    <main class="content">
+
+        <h2>Exploratory Data Analysis</h2>
+
+
+        {% if error %}
+
+        <div class="error">
+            {{ error }}
+        </div>
+
+        {% endif %}
+
+
+        {% if results %}
+
+
+        <!-- =================================================
+             TASK 1 - DATASET INFORMATION
+        ================================================== -->
+
+        <h3>Task 1 : Dataset Information</h3>
+
+        <table class="summary-table">
+
+            <tr>
+                <td>Rows</td>
+                <td>{{ results.n_rows }}</td>
+            </tr>
+
+            <tr>
+                <td>Columns</td>
+                <td>{{ results.n_cols }}</td>
+            </tr>
+
+        </table>
+
+
+        <h4>First 5 Rows</h4>
+
+        <div class="table-wrapper">
+
+            <table class="data-table">
+
+                <thead>
+                    <tr>
+
+                        {% for col in results.columns %}
+                            <th>{{ col }}</th>
+                        {% endfor %}
+
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for row in results.preview %}
+
+                    <tr>
+
+                        {% for col in results.columns %}
+                            <td>{{ row[col] }}</td>
+                        {% endfor %}
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        <!-- =================================================
+             TASK 2 - BASIC INFORMATION
+        ================================================== -->
+
+        <h3>Task 2 : Basic Information and Data Types</h3>
+
+        <div class="table-wrapper">
+
+            <table class="data-table">
+
+                <thead>
+                    <tr>
+                        <th>Column</th>
+                        <th>Datatype</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for col, dtype in results.dtypes.items() %}
+
+                    <tr>
+                        <td>{{ col }}</td>
+                        <td>{{ dtype }}</td>
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        <h4>Numeric Summary</h4>
+
+        <div class="table-wrapper">
+
+            <table class="data-table">
+
+                <thead>
+                    <tr>
+
+                        {% for c in results.numeric_columns %}
+                            <th>{{ c }}</th>
+                        {% endfor %}
+
+                    </tr>
+                </thead>
+
+                <tbody>
+[18-08-2026 11:56] Sandeep Klu: {% for row in results.numeric_desc %}
+
+                    <tr>
+
+                        {% for c in results.numeric_columns %}
+                            <td>{{ row[c] }}</td>
+                        {% endfor %}
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        <h4>Categorical Summary</h4>
+
+        <div class="table-wrapper">
+
+            <table class="data-table">
+
+                <thead>
+                    <tr>
+
+                        {% for c in results.categorical_columns %}
+                            <th>{{ c }}</th>
+                        {% endfor %}
+
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for row in results.categorical_desc %}
+
+                    <tr>
+
+                        {% for c in results.categorical_columns %}
+                            <td>{{ row[c] }}</td>
+                        {% endfor %}
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        <!-- =================================================
+             TASK 3 - MISSING VALUES
+        ================================================== -->
+
+        <h3>Task 3 : Missing Values</h3>
+
+        {% if results.missing_table|length > 0 %}
+
+        <div class="table-wrapper">
+
+            <table class="data-table">
+
+                <thead>
+                    <tr>
+
+                        {% for c in results.missing_columns %}
+                            <th>{{ c }}</th>
+                        {% endfor %}
+
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for row in results.missing_table %}
+
+                    <tr>
+
+                        {% for c in results.missing_columns %}
+                            <td>{{ row[c] }}</td>
+                        {% endfor %}
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        {% else %}
+
+            <p>No Missing Values Found.</p>
+
+        {% endif %}
+
+
+        <!-- =================================================
+             TASK 4 - DUPLICATES
+        ================================================== -->
+
+        <h3>Task 4 : Duplicate Rows</h3>
+
+        <table class="summary-table">
+
+            <tr>
+                <td>Duplicate Rows</td>
+                <td>{{ results.duplicate_count }}</td>
+            </tr>
+
+        </table>
+
+
+        <!-- =================================================
+             TASK 5 - TARGET VARIABLE
+        ================================================== -->
+
+        <h3>Task 5 : Target Variable - Placement Status</h3>
+
+        <table class="summary-table">
+
+            <tr>
+                <th>Placement Status</th>
+                <th>Count</th>
+            </tr>
+
+            {% for status, count in results.target_counts.items() %}
+
+            <tr>
+                <td>{{ status }}</td>
+                <td>{{ count }}</td>
+            </tr>
+
+            {% endfor %}
+
+        </table>
+
+
+        <div class="chart-grid">
+
+            <div class="chart-card">
+
+                <h4>Placement Status Distribution</h4>
+
+                <img src="{{ url_for(
+                    'static',
+                    filename='charts/placement_status.png'
+                ) }}"
+                alt="Placement Status Distribution">
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             TASK 6 - NUMERIC DISTRIBUTIONS
+        ================================================== -->
+
+        <h3>Task 6 : Numeric Feature Distribution</h3>
+
+        <div class="chart-grid">
+
+            <div class="chart-card">
+
+                <h4>Numeric Feature Distribution</h4>
+
+                <img src="{{ url_for(
+                    'static',
+                    filename='charts/numeric_feature_distribution.png'
+                ) }}"
+                alt="Numeric Feature Distribution">
+[18-08-2026 11:56] Sandeep Klu: </div>
+
+
+            <div class="chart-card">
+
+                <h4>CGPA Distribution with Mean</h4>
+
+                <img src="{{ url_for(
+                    'static',
+                    filename='charts/cgpa_distribution_mean.png'
+                ) }}"
+                alt="CGPA Distribution with Mean">
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             TASK 7 - OUTLIER DETECTION
+        ================================================== -->
+
+        <h3>Task 7 : Outlier Detection - Boxplots</h3>
+
+        <div class="chart-grid">
+
+            {% set boxplots = [
+                ("CGPA", "boxplot_cgpa.png"),
+                ("Attendance Percent", "boxplot_attendancepercent.png"),
+                ("Aptitude Test Score", "boxplot_aptitudetestscore.png"),
+                ("Internships", "boxplot_internships.png"),
+                ("Projects", "boxplot_projects.png"),
+                ("Workshops", "boxplot_workshops.png"),
+                ("Certifications", "boxplot_certifications.png"),
+                ("Publications", "boxplot_publications.png"),
+                ("Soft Skills Rating", "boxplot_softskillsrating.png"),
+                ("Coding Test Score", "boxplot_codingtestscore.png"),
+                ("Mock Interview Score", "boxplot_mockinterviewscore.png"),
+                ("Extra Curricular", "boxplot_extracurricular.png"),
+                ("Placement Status", "boxplot_placementstatus.png"),
+                ("Is Anomaly", "boxplot_isanomaly.png"),
+                ("Salary Package", "boxplot_salary_package.png")
+            ] %}
+
+            {% for title, filename in boxplots %}
+
+            <div class="chart-card">
+
+                <h4>{{ title }}</h4>
+
+                <img src="{{ url_for(
+                    'static',
+                    filename='charts/' + filename
+                ) }}"
+                alt="Boxplot of {{ title }}">
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+
+        <!-- =================================================
+             TASK 8 - CORRELATION HEATMAP
+        ================================================== -->
+
+        <h3>Task 8 : Correlation Heatmap</h3>
+
+        <div class="chart-grid">
+
+            <div class="chart-card">
+
+                <h4>Correlation Heatmap</h4>
+
+                <img src="{{ url_for(
+                    'static',
+                    filename='charts/correlation_heatmap.png'
+                ) }}"
+                alt="Correlation Heatmap">
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             TASK 9 - RELATIONSHIP PLOTS
+        ================================================== -->
+
+        <h3>Task 9 : Relationship Plots</h3>
+
+        <div class="chart-grid">
+
+            <div class="chart-card">
+
+                <h4>CGPA vs Salary Package</h4>
+
+                <img src="{{ url_for(
+                    'static',
+                    filename='charts/cgpa_vs_salary_package.png'
+                ) }}"
+                alt="CGPA vs Salary Package">
+
+            </div>
+
+
+            <div class="chart-card">
+
+                <h4>Aptitude Test Score vs Coding Test Score</h4>
+
+                <img src="{{ url_for(
+                    'static',
+                    filename='charts/aptitude_vs_coding.png'
+                ) }}"
+                alt="Aptitude Test Score vs Coding Test Score">
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             TASK 10 - CATEGORICAL FEATURE COUNTS
+        ================================================== -->
+
+        <h3>Task 10 : Categorical Feature Counts</h3>
+
+        <div class="chart-grid">
+[18-08-2026 11:56] Sandeep Klu: {% set categorical_charts = [
+                ("Gender", "countplot_gender.png"),
+                ("City", "countplot_city.png"),
+                ("College Tier", "countplot_collegetier.png"),
+                ("Stream", "countplot_stream.png"),
+                ("Specialization", "countplot_specialization.png"),
+                ("Hostel", "countplot_hostel.png"),
+                ("History Of Backlogs", "countplot_historyofbacklogs.png"),
+                ("CGPA Tier", "countplot_cgpa_tier.png")
+            ] %}
+
+            {% for title, filename in categorical_charts %}
+
+            <div class="chart-card">
+
+                <h4>{{ title }}</h4>
+
+                <img src="{{ url_for(
+                    'static',
+                    filename='charts/' + filename
+                ) }}"
+                alt="Count Plot - {{ title }}">
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+
+        <!-- =================================================
+             TASK 11 - GENDER VS PLACEMENT
+        ================================================== -->
+
+        <h3>Task 11 : Gender vs Placement Status</h3>
+
+        <div class="chart-grid">
+
+            <div class="chart-card">
+
+                <h4>Gender vs Placement Status</h4>
+
+                <img src="{{ url_for(
+                    'static',
+                    filename='charts/gender_vs_placement.png'
+                ) }}"
+                alt="Gender vs Placement Status">
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             TASK 12 - COLLEGE TIER / STREAM VS PLACEMENT
+        ================================================== -->
+
+        <h3>Task 12 : College Tier / Stream vs Placement Status</h3>
+
+        <div class="chart-grid">
+
+            <div class="chart-card">
+
+                <h4>College Tier vs Placement Status</h4>
+
+                <img src="{{ url_for(
+                    'static',
+                    filename='charts/college_tier_vs_placement.png'
+                ) }}"
+                alt="College Tier vs Placement Status">
+
+            </div>
+
+
+            <div class="chart-card">
+
+                <h4>Stream vs Placement Status</h4>
+
+                <img src="{{ url_for(
+                    'static',
+                    filename='charts/stream_vs_placement.png'
+                ) }}"
+                alt="Stream vs Placement Status">
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             TASK 13 - SGPA TREND
+        ================================================== -->
+
+        <h3>Task 13 : SGPA Trend Across Semesters</h3>
+
+        <div class="chart-grid">
+
+            <div class="chart-card">
+
+                <h4>Average SGPA Across Semesters</h4>
+
+                <img src="{{ url_for(
+                    'static',
+                    filename='charts/sgpa_trend.png'
+                ) }}"
+                alt="Average SGPA Across Semesters">
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             TASK 14 - SALARY PACKAGE ANALYSIS
+        ================================================== -->
+
+        <h3>Task 14 : Salary Package Analysis</h3>
+
+        <div class="chart-grid">
+
+            <div class="chart-card">
+
+                <h4>Salary Package Distribution - Placed Students</h4>
+
+                <img src="{{ url_for(
+                    'static',
+                    filename='charts/salary_package_distribution.png'
+                ) }}"
+                alt="Salary Package Distribution">
+
+            </div>
+
+
+            <div class="chart-card">
+
+                <h4>Salary Package by College Tier</h4>
+
+                <img src="{{ url_for(
+                    'static',
+                    filename='charts/salary_package_by_college_tier.png'
+                ) }}"
+                alt="Salary Package by College Tier">
+
+            </div>
+
+        </div>
+[18-08-2026 11:56] Sandeep Klu: <!-- =================================================
+             TASK 15 - PAIRPLOT
+        ================================================== -->
+
+        <h3>Task 15 : Pairplot</h3>
+
+        <div class="chart-grid">
+
+            <div class="chart-card pairplot-card">
+
+                <h4>Pairplot of Placement Features</h4>
+
+                <img src="{{ url_for(
+                    'static',
+                    filename='charts/pairplot.png'
+                ) }}"
+                alt="Pairplot of Placement Features">
+
+            </div>
+
+        </div>
+
+
+        {% endif %}
+
+    </main>
+
+</div>
+
+</body>
+
+</html>
